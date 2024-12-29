@@ -28,11 +28,44 @@
   color: #61dafb;
 }
 
+.todayOccupancyRate {
+  color: #ff5f11;
+  font-size: 50px;
+  font-weight: bold;
+  background: #d7d7d7;
+  border-radius: 31px;
+  width: 100px;
+  padding: 33px;
+  padding-top: 26px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+}
+
+.container {
+  border: 1px solid #afafaf;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 10px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 768px) {
+  .barGraph {
+    width: 70%;
+    margin: 0 auto;
+  }
+
+  .pieChart {
+    width: 70%;
+    margin: 0 auto;
   }
 }

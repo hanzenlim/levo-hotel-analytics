@@ -99,7 +99,7 @@ function App() {
             onClick={() => {
               const today = new Date(dateWeeklyOccupancy);
               const nextWeek = new Date(today);
-              nextWeek.setDate(today.getDate() + 7);
+              nextWeek.setDate(today.getDate() + 10);
               setDateWeeklyOccupancy(nextWeek);
             }}>
               Next Week

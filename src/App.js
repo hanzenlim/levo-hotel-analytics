@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import BarChart from './BarChart';
 import PieChart from './PieChart';
 import fetchOccupancy, { totalRooms } from './fetchOccupancy';
+import fetchArrivalList, { calculateDaysDifference } from './fetchArrivalList';
 import logo from './assets/images/levoLogo.png';
 
 import './App.css';
@@ -32,6 +33,10 @@ function App() {
 
   const [todayOccupancyData, setTodayOccupancyData] = useState([]);
 
+  // lead time reservation
+  const [leadTimeReservation, setLeadTimeReservation] = useState([]);
+
+  // Today occupancy rate
   useEffect(() => {
     async function fetchData() {
       const today = getFormattedDate(new Date());
@@ -58,6 +63,54 @@ function App() {
     fetchData();
   }, [dateWeeklyOccupancy]);
 
+  // fetch lead time reservation
+  useEffect(() => {
+    async function fetchData() {
+      const last5Days = getLastNDays(0, new Date());
+      const futureDates = [0,1,2,3,4,5,6,7].map((idx) => {
+        const today = new Date(); 
+        const future = new Date(today); 
+        future.setDate(today.getDate() + idx); 
+        return future;
+      })
+
+      const result = await Promise.all(futureDates.map(async (day) => {
+        const data = await fetchArrivalList(getFormattedDate(day), getFormattedDate(day));
+
+        const initialVal = {
+        };
+
+        const formattedData = data.Reservations.Reservation.reduce((acc, currentVal) => {
+          const bookingTran = currentVal.BookingTran[0];
+          const createdDateTime = bookingTran.Createdatetime;
+          let dayDiff = calculateDaysDifference(createdDateTime, day);
+          if (dayDiff >= 7) {
+            dayDiff = 7;
+          }
+
+          if (acc[dayDiff] !== undefined) {
+            return {
+              ...acc,
+              [dayDiff]: acc[dayDiff] + 1,
+            }
+          }
+
+          return {
+            ...acc,
+            [dayDiff]: 1,
+          }
+
+        }, initialVal)
+        
+        return {date: getFormattedDate(day), data: formattedData};
+      }))
+
+      setLeadTimeReservation(result);
+    }
+
+    fetchData();
+  }, [])
+
   return (
     <div className="App">
       <img width="300" height="70" src={logo} alt="description" />;
@@ -66,6 +119,10 @@ function App() {
           <h3>Today's Occupancy Rate</h3>
           <div className="todayOccupancyRate">
             {todayOccupancyData?.totalRoomsSold && `${Math.round((todayOccupancyData.totalRoomsSold / totalRooms) * 100)}%`}
+          </div>
+          <h3>Room Sold / Total Rooms</h3>
+          <div className="todayOccupancyNum">            
+            {todayOccupancyData?.totalRoomsSold}/{totalRooms}
           </div>
         </div>
         <div className="container">
@@ -114,6 +171,39 @@ function App() {
             >
              <BarChart occupancyData={weeklyOccupancyData} />
             </div>
+          </div>
+        </div>
+        <div className="container">
+          <h3>Lead Time Reservation</h3>
+          <div className="leadTimeReservation">
+            <table>
+              <tr>
+                <th>Date</th>
+                <th>0</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6</th>
+                <th>7</th>
+              </tr>
+              {leadTimeReservation.map((res) => {
+                return <>
+                  <tr>
+                    <td>{res.date}</td>
+                    {[0,1,2,3,4,5,6,7].map((key) => {
+                      if (res.data[key] === undefined) {
+                        return <td>0</td>
+                      }
+
+                      return <td>{res.data[key]}</td>
+                    })}
+                  
+                  </tr>
+                </>
+              })}
+            </table>
           </div>
         </div>
       </div>

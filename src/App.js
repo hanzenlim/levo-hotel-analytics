@@ -66,7 +66,6 @@ function App() {
   // fetch lead time reservation
   useEffect(() => {
     async function fetchData() {
-      const last5Days = getLastNDays(0, new Date());
       const futureDates = [0,1,2,3,4,5,6,7].map((idx) => {
         const today = new Date(); 
         const future = new Date(today); 

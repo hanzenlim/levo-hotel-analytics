@@ -81,6 +81,11 @@ function App() {
         const initialVal = {
         };
 
+
+        if (!data.Reservations) {
+          return {date: getFormattedDate(day), data: {}};
+        }
+
         const formattedData = data.Reservations.Reservation.reduce((acc, currentVal) => {
           const bookingTran = currentVal.BookingTran[0];
           const createdDateTime = bookingTran.Createdatetime;
